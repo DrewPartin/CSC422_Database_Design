@@ -1,0 +1,23 @@
+# ======================================================================================
+# Database Configuration Example
+# ======================================================================================
+# INSTRUCTIONS:
+# 1. Make a copy of this file
+# 2. Rename the copy to: db.properties
+# 3. Ensure db.properties is stored at the project root (same level as this example file)
+# 3. Update the values in your new db.properties file with YOUR db username and password
+#
+# IMPORTANT:
+# - Do NOT commit your db.properties file
+# - db.properties is git-ignored to protect credentials
+# - renaming your copy to db.properties is what ensures it gets ignored
+# ======================================================================================
+
+# MySQL connection URL
+db.url=jdbc:mysql://localhost:3306/TennisLeague?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+# MySQL UserName 
+db.user=YOUR_USERNAME
+
+# MySQL password
+db.password=YOUR_PASSWORD

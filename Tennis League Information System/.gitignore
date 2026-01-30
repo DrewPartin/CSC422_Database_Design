@@ -1,0 +1,13 @@
+# Database Credentials
+db.properties
+
+# Compiled Java Output
+bin/
+*.class
+
+# VS Code Java metadata
+.vscode/
+
+#OS Junk
+.DS_Store
+Thumbs.db
