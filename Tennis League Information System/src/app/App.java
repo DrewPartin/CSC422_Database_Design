@@ -85,8 +85,32 @@ public class App {
         }
     }
 
+    private static final PlayerDAO playerDao = new PlayerDAO();
+
     private static void viewPlayers() {
-        System.out.println("View Players - Functionality to be implemented.");
+        
+        List<Player> players = playerDao.getPlayersWithTeamSummary();
+
+        System.out.println();
+        System.out.println("PlayerID | League# | Name | Age | TeamNumber | TeamName | YearJoined | YearLeft");
+        System.out.println("--------------------------------------------------------------------------------");
+
+        for (Player p : players) {
+            String tn = (p.getTeamNumber() == null) ? "None" : String.valueOf(p.getTeamNumber());
+            String tname = (p.getTeamName() == null) ? "None" : p.getTeamName();
+            String yj = (p.getYearJoined() == null) ? "" : String.valueOf(p.getYearJoined());
+            String yl = (p.getYearLeft() == null) ? "CURRENT" : String.valueOf(p.getYearLeft());
+
+            System.out.printf("%d | %d | %s | %d | %s | %s | %s | %s%n",
+                    p.getPlayerId(),
+                    p.getLeagueWideNumber(),
+                    p.getName(),
+                    p.getAge(),
+                    tn,
+                    tname,
+                    yj,
+                    yl);
+        }
     }
 
     private static final CoachDAO coachDao = new CoachDAO();
@@ -234,22 +258,107 @@ public class App {
     }
 
     private static void addPlayer() {
-        System.out.println("[TODO] Add Player");
-        // Later: prompt for LeagueWideNumber, Name, Age
-        // optionally: prompt for team association + year joined/left
-        // Call playerDao.addPlayerAndAssociate(...)
+        
+        try {
+            System.out.print("LeagueWideNumber (int): ");
+            int leagueNum = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("Name: ");
+            String name = scanner.nextLine().trim();
+
+            System.out.print("Age (int): ");
+            int age = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("TeamNumber (int): ");
+            int teamNumber = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("YearJoined (blank for NULL): ");
+            String yj = scanner.nextLine().trim();
+            Integer yearJoined = yj.isEmpty() ? null : Integer.parseInt(yj);
+
+            System.out.print("YearLeft (blank for CURRENT/NULL): ");
+            String yl = scanner.nextLine().trim();
+            Integer yearLeft = yl.isEmpty() ? null : Integer.parseInt(yl);
+
+            Player p = new Player();
+            p.setLeagueWideNumber(leagueNum);
+            p.setName(name);
+            p.setAge(age);
+
+            boolean ok = playerDao.addPlayerWithAssociation(p, teamNumber, yearJoined, yearLeft);
+            System.out.println(ok ? "Player added." : "Failed to add player.");
+        } catch (Exception e) {
+            System.out.println("Invalid input. Player not added.");
+        }
     }
 
     private static void editPlayer() {
-        System.out.println("[TODO] Edit Player");
-        // Later: prompt for PlayerID, then fields to update
-        // Call playerDao.updatePlayer(...)
+        
+        try {
+            System.out.print("Enter PlayerID to edit: ");
+            int playerId = Integer.parseInt(scanner.nextLine().trim());
+
+            Player existing = playerDao.getPlayerById(playerId);
+            if (existing == null) {
+                System.out.println("Player not found.");
+                return;
+            }
+
+            System.out.println("Leave blank to keep current value.");
+
+            System.out.print("LeagueWideNumber (" + existing.getLeagueWideNumber() + "): ");
+            String ln = scanner.nextLine().trim();
+            if (!ln.isEmpty()) existing.setLeagueWideNumber(Integer.parseInt(ln));
+
+            System.out.print("Name (" + existing.getName() + "): ");
+            String name = scanner.nextLine().trim();
+            if (!name.isEmpty()) existing.setName(name);
+
+            System.out.print("Age (" + existing.getAge() + "): ");
+            String age = scanner.nextLine().trim();
+            if (!age.isEmpty()) existing.setAge(Integer.parseInt(age));
+
+            boolean ok = playerDao.updatePlayer(existing);
+            System.out.println(ok ? "Player updated." : "Failed to update player.");
+
+            System.out.print("Add/update current team association? (y/n): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("y")) {
+                System.out.print("TeamNumber (int): ");
+                int teamNumber = Integer.parseInt(scanner.nextLine().trim());
+
+                System.out.print("YearJoined (blank for NULL): ");
+                String yj = scanner.nextLine().trim();
+                Integer yearJoined = yj.isEmpty() ? null : Integer.parseInt(yj);
+
+                // Set YearLeft NULL so it shows as CURRENT
+                boolean assocOk = playerDao.addAssociation(playerId, teamNumber, yearJoined, null);
+                System.out.println(assocOk ? "Association added (CURRENT)." : "Failed to add association.");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Invalid input. Player not updated.");
+        }
     }
 
     private static void deletePlayer() {
-        System.out.println("[TODO] Delete Player");
-        // Later: prompt for PlayerID
-        // Call playerDao.deletePlayerCascade(...)
+        
+        try {
+            System.out.print("Enter PlayerID to delete: ");
+            int playerId = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("This will also delete PlayerTeamAssociation rows. Continue? (y/n): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (!confirm.equals("y")) {
+                System.out.println("Cancelled.");
+                return;
+            }
+
+            boolean ok = playerDao.deletePlayerCascade(playerId);
+            System.out.println(ok ? "Player deleted." : "Failed to delete player (not found).");
+        } catch (Exception e) {
+            System.out.println("Invalid input. Player not deleted.");
+        }
     }
 
     // Coach Management Menu
