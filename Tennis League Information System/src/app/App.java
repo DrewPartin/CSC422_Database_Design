@@ -14,6 +14,7 @@ public class App {
 
     private static final Scanner scanner = new Scanner(System.in);
     public static void main(String[] args) throws Exception {
+
         System.out.println("Tennis League Information System started...");
 
         while (true) {
@@ -44,6 +45,7 @@ public class App {
     
     // View Records Menu
     private static void viewRecordsMenu() {
+
         while (true) {
             System.out.println();
             System.out.println("===== VIEW RECORDS =====");
@@ -68,6 +70,7 @@ public class App {
     private static final TeamDAO teamDao = new TeamDAO();
 
     private static void viewTeams() {
+
         List<Team> teams = teamDao.getAllTeams();
 
         System.out.println();
@@ -86,12 +89,28 @@ public class App {
         System.out.println("View Players - Functionality to be implemented.");
     }
 
+    private static final CoachDAO coachDao = new CoachDAO();
+
     private static void viewCoaches() {
-        System.out.println("View Coaches - Functionality to be implemented.");
+        
+        List<Coach> coaches = coachDao.getAllCoachesWithTeamName();
+
+        System.out.println();
+        System.out.println("CoachID | Name | TelephoneNumber | TeamNumber | TeamName");
+        System.out.println("--------------------------------------------------------");
+        for (Coach c : coaches) {
+            System.out.printf("%d | %s | %s | %d | %s%n",
+                    c.getCoachID(),
+                    c.getName(),
+                    c.getTelephoneNumber(),
+                    c.getTeamNumber(),
+                    c.getTeamName());
+        }
     }
 
     // Team Management Menu
     private static void teamManagementMenu() {  
+
         while (true) {
             System.out.println();
             System.out.println("===== TEAM MANAGEMENT =====");
@@ -113,6 +132,7 @@ public class App {
     }
 
     private static void addTeam() {
+
         try {
             System.out.print("TeamNumber (int): ");
             int teamNumber = Integer.parseInt(scanner.nextLine().trim());
@@ -130,12 +150,14 @@ public class App {
             boolean ok = teamDao.addTeam(t);
 
             System.out.println(ok ? "Team added." : "Failed to add team.");
+
         } catch (Exception e) {
             System.out.println("Invalid input. Team not added.");
         }
     }
 
     private static void editTeam() {
+
         try {
             System.out.print("Enter TeamNumber to edit: ");
             int teamNumber = Integer.parseInt(scanner.nextLine().trim());
@@ -162,12 +184,14 @@ public class App {
 
             boolean ok = teamDao.updateTeam(existing);
             System.out.println(ok ? "Team updated." : "Failed to update team.");
+
         } catch (Exception e) {
             System.out.println("Invalid input. Team not updated.");
         }
     }
 
     private static void deleteTeam() {
+
         try {
             System.out.print("Enter TeamNumber to delete: ");
             int teamNumber = Integer.parseInt(scanner.nextLine().trim());
@@ -181,6 +205,7 @@ public class App {
 
             boolean ok = teamDao.deleteTeamCascade(teamNumber);
             System.out.println(ok ? "Team deleted." : "Failed to delete team (not found or constraint issue).");
+
         } catch (Exception e) {
             System.out.println("Invalid input. Team not deleted.");
         }
@@ -250,20 +275,82 @@ public class App {
     }
 
     private static void addCoach() {
-        System.out.println("[TODO] Add Coach");
-        // Later: prompt for Name, TelephoneNumber, TeamNumber
-        // Call coachDao.addCoach(...)
+        
+        try {
+            System.out.print("Name: ");
+            String name = scanner.nextLine().trim();
+
+            System.out.print("TelephoneNumber: ");
+            String phone = scanner.nextLine().trim();
+
+            System.out.print("TeamNumber (int): ");
+            int teamNumber = Integer.parseInt(scanner.nextLine().trim());
+
+            Coach c = new Coach();
+            c.setName(name);
+            c.setTelephoneNumber(phone);
+            c.setTeamNumber(teamNumber);
+
+            boolean ok = coachDao.addCoach(c);
+            System.out.println(ok ? "Coach added." : "Failed to add coach.");
+
+        } catch (Exception e) {
+            System.out.println("Invalid input. Coach not added.");
+        }
     }
 
     private static void editCoach() {
-        System.out.println("[TODO] Edit Coach");
-        // Later: prompt for CoachID, then fields to update
-        // Call coachDao.updateCoach(...)
+        
+        try {
+            System.out.print("Enter CoachID to edit: ");
+            int coachId = Integer.parseInt(scanner.nextLine().trim());
+
+            Coach existing = coachDao.getCoachById(coachId);
+            if (existing == null) {
+                System.out.println("Coach not found.");
+                return;
+            }
+
+            System.out.println("Leave blank to keep current value.");
+
+            System.out.print("Name (" + existing.getName() + "): ");
+            String name = scanner.nextLine().trim();
+            if (!name.isEmpty()) existing.setName(name);
+
+            System.out.print("TelephoneNumber (" + existing.getTelephoneNumber() + "): ");
+            String phone = scanner.nextLine().trim();
+            if (!phone.isEmpty()) existing.setTelephoneNumber(phone);
+
+            System.out.print("TeamNumber (" + existing.getTeamNumber() + "): ");
+            String tn = scanner.nextLine().trim();
+            if (!tn.isEmpty()) existing.setTeamNumber(Integer.parseInt(tn));
+
+            boolean ok = coachDao.updateCoach(existing);
+            System.out.println(ok ? "Coach updated." : "Failed to update coach.");
+
+        } catch (Exception e) {
+            System.out.println("Invalid input. Coach not updated.");
+        }
     }
 
     private static void deleteCoach() {
-        System.out.println("[TODO] Delete Coach");
-        // Later: prompt for CoachID
-        // Call coachDao.deleteCoachCascade(...)
+        
+        try {
+            System.out.print("Enter CoachID to delete: ");
+            int coachId = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("This will also delete related WorkExperience records. Continue? (y/n): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (!confirm.equals("y")) {
+                System.out.println("Cancelled.");
+                return;
+            }
+
+            boolean ok = coachDao.deleteCoachCascade(coachId);
+            System.out.println(ok ? "Coach deleted." : "Failed to delete coach (not found).");
+            
+        } catch (Exception e) {
+            System.out.println("Invalid input. Coach not deleted.");
+        }
     }
 }
