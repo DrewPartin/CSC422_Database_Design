@@ -65,8 +65,21 @@ public class App {
         }
     }
 
+    private static final TeamDAO teamDao = new TeamDAO();
+
     private static void viewTeams() {
-        System.out.println("View Teams - Functionality to be implemented.");
+        List<Team> teams = teamDao.getAllTeams();
+
+        System.out.println();
+        System.out.println("TeamNumber | Name | City | ManagerName");
+        System.out.println("----------------------------------------------------");
+        for (Team t : teams) {
+            System.out.printf("%d | %s | %s | %s%n",
+                t.getTeamNumber(),
+                t.getName(),
+                t.getCity(),
+                t.getManagerName());
+        }
     }
 
     private static void viewPlayers() {
@@ -78,17 +91,179 @@ public class App {
     }
 
     // Team Management Menu
-    private static void teamManagementMenu() {
-        System.out.println("Team Management - Functionality to be implemented.");
+    private static void teamManagementMenu() {  
+        while (true) {
+            System.out.println();
+            System.out.println("===== TEAM MANAGEMENT =====");
+            System.out.println("1) Add Team");
+            System.out.println("2) Edit Team");
+            System.out.println("3) Delete Team");
+            System.out.println("0) Back");
+            System.out.print("Select an option: ");
+
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
+                case "1": addTeam(); break;
+                case "2": editTeam(); break;
+                case "3": deleteTeam(); break;
+                case "0": return;
+                default: System.out.println("Invalid option.");
+            }
+        }
+    }
+
+    private static void addTeam() {
+        try {
+            System.out.print("TeamNumber (int): ");
+            int teamNumber = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("Name: ");
+            String name = scanner.nextLine().trim();
+
+            System.out.print("City: ");
+            String city = scanner.nextLine().trim();
+
+            System.out.print("ManagerName: ");
+            String managerName = scanner.nextLine().trim();
+
+            Team t = new Team(teamNumber, name, city, managerName);
+            boolean ok = teamDao.addTeam(t);
+
+            System.out.println(ok ? "Team added." : "Failed to add team.");
+        } catch (Exception e) {
+            System.out.println("Invalid input. Team not added.");
+        }
+    }
+
+    private static void editTeam() {
+        try {
+            System.out.print("Enter TeamNumber to edit: ");
+            int teamNumber = Integer.parseInt(scanner.nextLine().trim());
+
+            Team existing = teamDao.getTeamByNumber(teamNumber);
+            if (existing == null) {
+                System.out.println("Team not found.");
+                return;
+            }
+
+            System.out.println("Leave blank to keep current value.");
+
+            System.out.print("Name (" + existing.getName() + "): ");
+            String name = scanner.nextLine().trim();
+            if (!name.isEmpty()) existing.setName(name);
+
+            System.out.print("City (" + existing.getCity() + "): ");
+            String city = scanner.nextLine().trim();
+            if (!city.isEmpty()) existing.setCity(city);
+
+            System.out.print("ManagerName (" + existing.getManagerName() + "): ");
+            String manager = scanner.nextLine().trim();
+            if (!manager.isEmpty()) existing.setManagerName(manager);
+
+            boolean ok = teamDao.updateTeam(existing);
+            System.out.println(ok ? "Team updated." : "Failed to update team.");
+        } catch (Exception e) {
+            System.out.println("Invalid input. Team not updated.");
+        }
+    }
+
+    private static void deleteTeam() {
+        try {
+            System.out.print("Enter TeamNumber to delete: ");
+            int teamNumber = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("This will also remove dependent records (coaches, work experience, player associations). Continue? (y/n): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (!confirm.equals("y")) {
+                System.out.println("Cancelled.");
+                return;
+            }
+
+            boolean ok = teamDao.deleteTeamCascade(teamNumber);
+            System.out.println(ok ? "Team deleted." : "Failed to delete team (not found or constraint issue).");
+        } catch (Exception e) {
+            System.out.println("Invalid input. Team not deleted.");
+        }
     }
 
     // Player Management Menu
     private static void playerManagementMenu() {
-        System.out.println("Player Management - Functionality to be implemented.");
+        while (true) {
+            System.out.println();
+            System.out.println("===== PLAYER MANAGEMENT =====");
+            System.out.println("1) Add Player");
+            System.out.println("2) Edit Player");
+            System.out.println("3) Delete Player");
+            System.out.println("0) Back");
+            System.out.print("Select an option: ");
+
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
+                case "1": addPlayer(); break;
+                case "2": editPlayer(); break;
+                case "3": deletePlayer(); break;
+                case "0": return;
+                default: System.out.println("Invalid option.");
+            }
+        }
+    }
+
+    private static void addPlayer() {
+        System.out.println("[TODO] Add Player");
+        // Later: prompt for LeagueWideNumber, Name, Age
+        // optionally: prompt for team association + year joined/left
+        // Call playerDao.addPlayerAndAssociate(...)
+    }
+
+    private static void editPlayer() {
+        System.out.println("[TODO] Edit Player");
+        // Later: prompt for PlayerID, then fields to update
+        // Call playerDao.updatePlayer(...)
+    }
+
+    private static void deletePlayer() {
+        System.out.println("[TODO] Delete Player");
+        // Later: prompt for PlayerID
+        // Call playerDao.deletePlayerCascade(...)
     }
 
     // Coach Management Menu
     private static void coachManagementMenu() {
-        System.out.println("Coach Management - Functionality to be implemented.");
+        while (true) {
+            System.out.println();
+            System.out.println("===== COACH MANAGEMENT =====");
+            System.out.println("1) Add Coach");
+            System.out.println("2) Edit Coach");
+            System.out.println("3) Delete Coach");
+            System.out.println("0) Back");
+            System.out.print("Select an option: ");
+
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
+                case "1": addCoach(); break;
+                case "2": editCoach(); break;
+                case "3": deleteCoach(); break;
+                case "0": return;
+                default: System.out.println("Invalid option.");
+            }
+        }
+    }
+
+    private static void addCoach() {
+        System.out.println("[TODO] Add Coach");
+        // Later: prompt for Name, TelephoneNumber, TeamNumber
+        // Call coachDao.addCoach(...)
+    }
+
+    private static void editCoach() {
+        System.out.println("[TODO] Edit Coach");
+        // Later: prompt for CoachID, then fields to update
+        // Call coachDao.updateCoach(...)
+    }
+
+    private static void deleteCoach() {
+        System.out.println("[TODO] Delete Coach");
+        // Later: prompt for CoachID
+        // Call coachDao.deleteCoachCascade(...)
     }
 }
